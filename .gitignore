@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+dist/
+build/
+*.egg-info/
+.venv/
+
+# Never commit applications or Finder cruft into a source repo.
+GitHub Desktop.app/
+*.app/
+.DS_Store
+
+# A local helper for one machine. Not for a public repository.
+PUBLISH.command
