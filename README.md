@@ -144,10 +144,16 @@ leniency that forgives a stray `R` would forgive a changed digit.
 
 ## Install
 
-**Not on PyPI yet.** Until it is, use it from source — there is nothing to build:
+**Not on PyPI yet.** Install from source — there is nothing to build:
 
 ```
-git clone https://github.com/<user>/quoted && export PYTHONPATH=quoted/src
+pip install git+https://github.com/kookyeus/quoted
+```
+
+Or clone it and point Python at `src/`:
+
+```
+git clone https://github.com/kookyeus/quoted && export PYTHONPATH=quoted/src
 ```
 
 No dependencies. Pure standard library, Python 3.10+.
