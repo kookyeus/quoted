@@ -25,10 +25,16 @@ class Source:
     name: str
     text: str
     _pages: list[tuple[int, int, str]] = field(default_factory=list, repr=False)
+    _norm: str = field(default="", repr=False, compare=False)
 
     def __post_init__(self) -> None:
         if not self.text or not self.text.strip():
             raise Unreadable(f"{self.name} is empty — nothing can be quoted from it")
+        # **Normalise once, here.** `find` previously normalised the whole document
+        # on every call — three times per call, in fact — and the service bisects
+        # with repeated `find`s, so a 280k-character document was being normalised
+        # a dozen times per request. Same answers, a fraction of the work.
+        object.__setattr__(self, "_norm", normalise(self.text))
         self._index_pages()
 
     # --- construction ---------------------------------------------------------
@@ -57,7 +63,7 @@ class Source:
         """
         if not quote or not quote.strip():
             return None
-        at = normalise(self.text).find(normalise(quote))
+        at = self._norm.find(normalise(quote))
         if at < 0:
             return None
         raw_at = self._raw_offset(quote)
@@ -115,7 +121,7 @@ class Source:
         return "location not identified"
 
     def _raw_offset(self, quote: str) -> int:
-        return self._raw_offset_at(normalise(self.text).find(normalise(quote)))
+        return self._raw_offset_at(self._norm.find(normalise(quote)))
 
     def _raw_offset_at(self, norm_index: int) -> int:
         """Map a normalised index back to roughly where it sits in the original.
@@ -124,7 +130,7 @@ class Source:
         """
         if norm_index < 0:
             return 0
-        ratio = norm_index / max(1, len(normalise(self.text)))
+        ratio = norm_index / max(1, len(self._norm))
         return min(len(self.text) - 1, int(ratio * len(self.text)))
 
     def _verbatim(self, quote: str, near: int) -> str | None:
