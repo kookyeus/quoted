@@ -1,0 +1,23 @@
+# Render blueprint for `quoted`.
+#
+# Chosen for T-107 because its free tier needs no card — which matters here:
+# Sir is sixteen with no payment method, and a host demanding one is a wall,
+# not an inconvenience.
+#
+# The honest trade: free instances sleep after ~15 minutes idle and take
+# roughly 50 seconds to wake. For a verification API being evaluated by a
+# developer that is acceptable. It would not be acceptable to a paying
+# customer, and the pricing sheet says so.
+services:
+  - type: web
+    name: quoted
+    runtime: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    envVars:
+      # MAX_BYTES is deliberately below the default 4MB: a free instance has
+      # 512MB of RAM, and refusing a large document is honest behaviour the
+      # service already implements.
+      - key: MAX_BYTES
+        value: "1048576"

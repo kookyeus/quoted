@@ -17,8 +17,12 @@ ENV PYTHONPATH=/app/src \
 USER 65534:65534
 
 EXPOSE 8080
-HEALTHCHECK --interval=30s --timeout=3s --start-period=3s \
-  CMD python3 -c "import urllib.request,sys;\
-sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8080/health',timeout=2).status==200 else 1)"
+# **Read PORT, do not assume 8080.** Every managed host injects its own port;
+# a healthcheck hardcoded to 8080 marks a perfectly healthy container unhealthy
+# and the platform kills it. Verified 2026-08-23: the service answered on 7788
+# while the old check got nothing on 8080.
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s \
+  CMD python3 -c "import os,sys,urllib.request;\
+sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:'+os.environ.get('PORT','8080')+'/health',timeout=2).status==200 else 1)"
 
 CMD ["python3", "-m", "quoted.serve"]
