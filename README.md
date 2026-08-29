@@ -176,6 +176,17 @@ human or model — guesses again. So over HTTP the refusal names **the longest r
 the quote that is genuinely in the document, and the exact point where it stops
 being true.**
 
+**Running at https://quoted-jnow.onrender.com** — try it:
+
+```
+curl -X POST https://quoted-jnow.onrender.com/verify -d '{
+  "document": "The on-peak demand charge applies from 10 a.m. to 8 p.m. on weekdays.",
+  "quote": "from 10 a.m. to 10 p.m. every day"}'
+```
+
+It is a free instance: it sleeps after about fifteen minutes and takes roughly
+fifty seconds to wake. Or run it yourself:
+
 ```
 python3 -m quoted.serve          # PORT and MAX_BYTES from the environment
 ```
