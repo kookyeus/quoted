@@ -43,6 +43,8 @@ PORT = int(os.environ.get("PORT", "8080"))
 
 # A document larger than this is refused rather than silently truncated —
 # truncation would let a quotation "not be found" because we stopped reading.
+from . import page                                  # noqa: E402
+
 MAX_BYTES = int(os.environ.get("MAX_BYTES", str(4 * 1024 * 1024)))
 
 # A verified prefix shorter than this is noise — see `_divergence`.
@@ -151,8 +153,23 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(raw)
 
+    def _send_html(self, body: str) -> None:
+        raw = body.encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(raw)))
+        self.end_headers()
+        self.wfile.write(raw)
+
     def do_GET(self) -> None:                                   # noqa: N802
-        if self.path.rstrip("/") in ("/health", ""):
+        path = self.path.rstrip("/")
+        # **A person following the link gets a page.** For eight days this
+        # returned the health blob to everyone, so the service was live and the
+        # product did not exist. `/health` keeps the JSON, because that is what
+        # the platform reads.
+        if path == "":
+            self._send_html(page.html())
+        elif path == "/health":
             self._send(200, {"ok": True, "service": "quoted",
                              "uptime_seconds": round(time.time() - STARTED, 1),
                              "endpoints": sorted(ROUTES)})
